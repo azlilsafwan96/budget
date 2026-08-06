@@ -67,6 +67,7 @@ npx prisma studio                        # browse data
 ```bash
 cp .env.example .env   # set a real AUTH_SECRET
 export AUTH_SECRET=$(openssl rand -base64 32)
+export AUTH_URL=https://YOUR_DOMAIN
 docker compose --profile prod up -d --build
 ```
 
@@ -75,7 +76,11 @@ runs `prisma migrate deploy` on boot, then starts the server. Put a reverse
 proxy (nginx/Caddy) in front of port 3000 for TLS.
 
 `AUTH_TRUST_HOST=true` is set for the app service — required by Auth.js
-when running behind a reverse proxy instead of on Vercel.
+when running behind a reverse proxy instead of on Vercel. Set `AUTH_URL` to
+your real domain too: without it, Auth.js infers the base URL from request
+headers, which can resolve to the container's internal `localhost:3000` if
+your reverse proxy doesn't forward `Host`/`X-Forwarded-*` correctly — causing
+Google login to redirect to `localhost` after auth instead of your domain.
 
 ## Notes on this Next.js/Prisma version
 
