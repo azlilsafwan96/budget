@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String?
+  name             String
+  image            String?
+  accentColor      String   @default("#2f9e6e")
+  showGamification Boolean  @default(true)
+  density          Density  @default(comfortable)
+  createdAt        DateTime @default(now())
+
+  categories   Category[]
+  transactions Transaction[]
+  bills        Bill[]
+  streakLogs   StreakLog[]
+  savingsGoals SavingsGoal[]
+}
+
+enum Density {
+  comfortable
+  compact
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  monthlyLimit Int
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+
+  @@unique([userId, name])
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  merchant   String
+  amount     Int
+  date       DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model Bill {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  amount    Int
+  dueDay    Int
+  autopay   Boolean  @default(false)
+  paid      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SavingsGoal {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  targetAmount  Int
+  currentAmount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+model StreakLog {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date   DateTime @db.Date
+
+  @@unique([userId, date])
+}

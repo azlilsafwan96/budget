@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(98% 0.004 90);
+  --foreground: oklch(22% 0.01 90);
+  --surface: oklch(99% 0.002 90);
+  --border: oklch(91% 0.005 90);
+  --muted: oklch(52% 0.012 90);
+  --muted-strong: oklch(45% 0.012 90);
+  --track: oklch(93% 0.005 90);
+  --pill-bg: oklch(95% 0.006 90);
+  --near-limit: oklch(62% 0.14 70);
+  --over-budget: oklch(58% 0.17 35);
+  --success-bg: oklch(95% 0.03 155);
+  --success-fg: oklch(38% 0.1 155);
+
+  /* Per-user, set by ThemeVars from the User row */
+  --accent: #2f9e6e;
+  --row-gap: 20px;
+  --row-pad: 15px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-track: var(--track);
+  --color-pill-bg: var(--pill-bg);
+  --color-near-limit: var(--near-limit);
+  --color-over-budget: var(--over-budget);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 }

@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Budget Dashboard
 
-## Getting Started
+A self-hostable personal budgeting app: monthly spend vs. budget by category,
+a savings goal, recent transactions, upcoming bills, and an optional
+logging-streak/badges panel. Built with Next.js (App Router), Prisma +
+PostgreSQL, and Auth.js credentials-based login.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router, TypeScript, Tailwind CSS v4)
+- PostgreSQL via Prisma ORM 7 (driver adapter: `@prisma/adapter-pg`)
+- Auth.js (NextAuth v5) — email/password (Credentials provider), JWT sessions
+- Docker Compose for self-hosting (app + Postgres)
+
+## Local development
+
+Requires Node 20+ and Docker.
 
 ```bash
+npm install
+docker compose up -d db          # local Postgres on :5432
+cp .env.example .env              # then edit AUTH_SECRET
+npx prisma migrate deploy
+npx prisma db seed                # optional: demo data
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at http://localhost:3000. The seed script creates a demo account:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Email: `aiman@example.com`
+- Password: `password123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Generate a real `AUTH_SECRET` with `openssl rand -base64 32`.
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app/(app)/` — authenticated routes: `dashboard`, `bills`,
+  `settings/categories`, sharing a layout that applies the user's accent
+  color/density as CSS variables (`src/components/theme-vars.tsx`).
+- `src/app/login`, `src/app/register` — public auth pages.
+- `src/auth.ts` — Auth.js config (Credentials provider, JWT callbacks).
+- `proxy.ts` — route protection (Next.js 16 renamed `middleware.ts` to
+  `proxy.ts`; functionally the same).
+- `src/lib/dal.ts` — session verification / current-user data access layer.
+- `src/lib/actions/` — Server Actions for auth, transactions, bills, and
+  settings mutations.
+- `prisma/schema.prisma` — `User`, `Category`, `Transaction`, `Bill`,
+  `SavingsGoal`, `StreakLog`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Prisma 7 requires a driver adapter at runtime (no implicit `datasource.url`
+in `PrismaClient`) — see `src/lib/prisma.ts`. Migrations still read
+`DATABASE_URL` via `prisma.config.ts`.
 
-## Deploy on Vercel
+Common commands:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npx prisma migrate dev --name <change>   # create + apply a migration (dev)
+npx prisma migrate deploy                # apply migrations (prod)
+npx prisma db seed                       # re-run the seed script
+npx prisma studio                        # browse data
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploying to your own server
+
+```bash
+cp .env.example .env   # set a real AUTH_SECRET
+export AUTH_SECRET=$(openssl rand -base64 32)
+docker compose --profile prod up -d --build
+```
+
+This starts Postgres and the app in one Compose project. The app container
+runs `prisma migrate deploy` on boot, then starts the server. Put a reverse
+proxy (nginx/Caddy) in front of port 3000 for TLS.
+
+`AUTH_TRUST_HOST=true` is set for the app service — required by Auth.js
+when running behind a reverse proxy instead of on Vercel.
+
+## Notes on this Next.js/Prisma version
+
+This scaffold uses Next.js 16 and Prisma 7, both of which shipped breaking
+changes after most training data cutoffs:
+
+- Next.js: `middleware.ts` → `proxy.ts` (same behavior, new file name).
+- Prisma: `datasource.url` moved out of `schema.prisma` into
+  `prisma.config.ts`; `PrismaClient` now requires an explicit driver
+  adapter (`@prisma/adapter-pg` here) instead of reading `DATABASE_URL`
+  implicitly.
+
+See `node_modules/next/dist/docs/` and the Prisma skills under
+`.claude/skills/` if extending this further.
