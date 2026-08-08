@@ -23,6 +23,8 @@ model User {
   bills        Bill[]
   streakLogs   StreakLog[]
   savingsGoals SavingsGoal[]
+  plans        Plan[]
+  tags         Tag[]
 }
 
 model Category {
@@ -84,4 +86,38 @@ model StreakLog {
   date   DateTime @db.Date
 
   @@unique([userId, date])
+}
+
+model Plan {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime   @default(now())
+  items     PlanItem[]
+
+  @@index([userId])
+}
+
+model PlanItem {
+  id        String   @id @default(cuid())
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  name      String
+  amount    Int
+  bought    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  tags      Tag[]
+
+  @@index([planId])
+}
+
+model Tag {
+  id     String     @id @default(cuid())
+  userId String
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+  items  PlanItem[]
+
+  @@unique([userId, name])
 }
