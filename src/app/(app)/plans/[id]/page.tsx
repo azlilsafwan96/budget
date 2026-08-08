@@ -21,6 +21,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ id:
     <PlanDetail
       planId={plan.id}
       planName={plan.name}
+      planDescription={plan.description}
       items={plan.items.map((item) => ({
         id: item.id,
         name: item.name,

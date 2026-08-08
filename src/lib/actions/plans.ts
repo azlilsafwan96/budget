@@ -7,6 +7,7 @@ import { verifySession } from "@/lib/dal";
 
 const PlanSchema = z.object({
   name: z.string().min(1, { error: "Name is required." }).trim(),
+  description: z.string().trim().optional(),
 });
 
 export type PlanFormState = { errors?: Record<string, string[]>; message?: string } | undefined;
@@ -17,12 +18,21 @@ export async function createPlan(
 ): Promise<PlanFormState> {
   const { userId } = await verifySession();
 
-  const validated = PlanSchema.safeParse({ name: formData.get("name") });
+  const validated = PlanSchema.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description") || undefined,
+  });
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors };
   }
 
-  await prisma.plan.create({ data: { userId, name: validated.data.name } });
+  await prisma.plan.create({
+    data: {
+      userId,
+      name: validated.data.name,
+      description: validated.data.description || null,
+    },
+  });
 
   revalidatePath("/plans");
 }

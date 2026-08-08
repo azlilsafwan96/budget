@@ -89,12 +89,13 @@ model StreakLog {
 }
 
 model Plan {
-  id        String     @id @default(cuid())
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  createdAt DateTime   @default(now())
-  items     PlanItem[]
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  items       PlanItem[]
 
   @@index([userId])
 }

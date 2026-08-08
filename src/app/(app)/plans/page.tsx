@@ -27,6 +27,7 @@ export default async function PlansPage() {
               key={plan.id}
               id={plan.id}
               name={plan.name}
+              description={plan.description}
               itemCount={plan.items.length}
               totalLabel={fmt(plan.items.reduce((sum, i) => sum + i.amount, 0))}
             />

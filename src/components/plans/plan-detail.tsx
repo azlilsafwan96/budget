@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { fmt } from "@/lib/currency";
 import { PlanItemRow } from "@/components/plans/plan-item-row";
 import { AddPlanItem } from "@/components/plans/add-plan-item";
@@ -10,11 +11,13 @@ type Item = { id: string; name: string; amount: number; bought: boolean; tags: s
 export function PlanDetail({
   planId,
   planName,
+  planDescription,
   items,
   allTags,
 }: {
   planId: string;
   planName: string;
+  planDescription: string | null;
   items: Item[];
   allTags: string[];
 }) {
@@ -39,8 +42,20 @@ export function PlanDetail({
 
   return (
     <>
-      <div className="flex justify-between items-end flex-wrap gap-4">
-        <div className="text-2xl md:text-[28px] font-bold tracking-tight">{planName}</div>
+      <Link
+        href="/plans"
+        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted no-underline transition-colors hover:text-foreground w-fit"
+      >
+        ← Back to plans
+      </Link>
+
+      <div className="flex justify-between items-end flex-wrap gap-4 mt-4">
+        <div>
+          <div className="text-2xl md:text-[28px] font-bold tracking-tight">{planName}</div>
+          {planDescription && (
+            <div className="text-sm mt-1 text-muted max-w-prose">{planDescription}</div>
+          )}
+        </div>
         <AddPlanItem planId={planId} allTags={allTags} />
       </div>
 

@@ -49,6 +49,17 @@ export function AddPlan() {
                 )}
               </div>
 
+              <div>
+                <label className="text-xs font-semibold text-muted-strong">
+                  Description (optional)
+                </label>
+                <textarea
+                  name="description"
+                  rows={3}
+                  className="w-full mt-1 border border-border rounded-md px-3 py-2 text-sm bg-transparent resize-none"
+                />
+              </div>
+
               <div className="flex justify-end gap-2 mt-2">
                 <button
                   type="button"

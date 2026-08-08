@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { deletePlan } from "@/lib/actions/plans";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
@@ -9,18 +9,22 @@ import { useToast } from "@/components/ui/toast";
 export function PlanRow({
   id,
   name,
+  description,
   itemCount,
   totalLabel,
 }: {
   id: string;
   name: string;
+  description: string | null;
   itemCount: number;
   totalLabel: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const { showToast } = useToast();
+  const router = useRouter();
 
-  function handleDelete() {
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
     startTransition(async () => {
       await deletePlan(id);
       showToast("Plan deleted");
@@ -29,17 +33,28 @@ export function PlanRow({
 
   return (
     <div
-      className="flex justify-between items-center flex-wrap gap-3 border-t border-border"
+      role="link"
+      tabIndex={0}
+      onClick={() => router.push(`/plans/${id}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") router.push(`/plans/${id}`);
+      }}
+      className="flex justify-between items-center flex-wrap gap-3 border-t border-border cursor-pointer transition-colors hover:bg-black/5"
       style={{ padding: "var(--row-pad) 0", opacity: isPending ? 0.6 : 1 }}
     >
-      <Link href={`/plans/${id}`} className="no-underline">
+      <div>
         <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
           {name}
         </div>
         <div className="text-xs mt-0.5 text-muted">
           {itemCount} {itemCount === 1 ? "item" : "items"}
         </div>
-      </Link>
+        {description && (
+          <div className="text-xs mt-0.5 text-muted-strong line-clamp-1 max-w-[280px]">
+            {description}
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-3 sm:gap-4">
         <div className="text-sm font-semibold tabular-nums">{totalLabel}</div>
         <button
