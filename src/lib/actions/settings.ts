@@ -46,6 +46,50 @@ export async function addCategory(
   revalidatePath("/dashboard");
 }
 
+const UpdateCategorySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1, { error: "Name is required." }).trim(),
+  monthlyLimit: z.coerce.number().positive({ error: "Limit must be greater than 0." }),
+});
+
+export async function updateCategory(
+  _state: CategoryFormState,
+  formData: FormData,
+): Promise<CategoryFormState> {
+  const { userId } = await verifySession();
+
+  const validated = UpdateCategorySchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    monthlyLimit: formData.get("monthlyLimit"),
+  });
+
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors };
+  }
+
+  const existing = await prisma.category.findUnique({
+    where: { userId_name: { userId, name: validated.data.name } },
+  });
+  if (existing && existing.id !== validated.data.id) {
+    return { message: "You already have a category with that name." };
+  }
+
+  const result = await prisma.category.updateMany({
+    where: { id: validated.data.id, userId },
+    data: {
+      name: validated.data.name,
+      monthlyLimit: Math.round(validated.data.monthlyLimit * 100),
+    },
+  });
+  if (result.count === 0) {
+    return { message: "That category no longer exists." };
+  }
+
+  revalidatePath("/settings/categories");
+  revalidatePath("/dashboard");
+}
+
 export async function deleteCategory(categoryId: string): Promise<{ error?: string }> {
   const { userId } = await verifySession();
 

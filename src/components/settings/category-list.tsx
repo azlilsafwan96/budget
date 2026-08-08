@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
-import { addCategory, deleteCategory, type CategoryFormState } from "@/lib/actions/settings";
-import { fmt } from "@/lib/currency";
+import { useActionState, useEffect, useRef } from "react";
+import { addCategory, type CategoryFormState } from "@/lib/actions/settings";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import { CategoryRow } from "@/components/settings/category-row";
 
 export function CategoryList({
   categories,
@@ -15,9 +15,6 @@ export function CategoryList({
     addCategory,
     undefined,
   );
-  const [isDeleting, startTransition] = useTransition();
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { showToast } = useToast();
   const wasPending = useRef(false);
 
@@ -28,52 +25,14 @@ export function CategoryList({
     wasPending.current = pending;
   }, [pending, state, showToast]);
 
-  function handleDelete(id: string) {
-    setDeleteError(null);
-    setDeletingId(id);
-    startTransition(async () => {
-      const result = await deleteCategory(id);
-      if (result.error) {
-        setDeleteError(result.error);
-      } else {
-        showToast("Category deleted");
-      }
-      setDeletingId(null);
-    });
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
         {categories.length === 0 && <div className="text-sm text-muted py-2">No categories yet.</div>}
         {categories.map((c) => (
-          <div
-            key={c.id}
-            className="flex justify-between items-center flex-wrap gap-3 border-t border-border py-3"
-          >
-            <div className="text-sm font-semibold">{c.name}</div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm tabular-nums text-muted-strong">{fmt(c.monthlyLimit)}/mo</div>
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() => handleDelete(c.id)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition-colors disabled:cursor-not-allowed hover:not-disabled:bg-[color-mix(in_oklch,var(--over-budget)_12%,transparent)]"
-                style={{ color: "var(--over-budget)" }}
-              >
-                {deletingId === c.id && <Spinner className="w-3.5 h-3.5" />}
-                Delete
-              </button>
-            </div>
-          </div>
+          <CategoryRow key={c.id} id={c.id} name={c.name} monthlyLimit={c.monthlyLimit} />
         ))}
       </div>
-
-      {deleteError && (
-        <p className="text-xs" style={{ color: "var(--over-budget)" }}>
-          {deleteError}
-        </p>
-      )}
 
       <form
         action={action}
