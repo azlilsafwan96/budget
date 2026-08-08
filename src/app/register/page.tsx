@@ -11,7 +11,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm bg-surface border border-border rounded-xl p-8">
+      <div className="w-full max-w-sm bg-surface border border-border rounded-xl p-6 sm:p-8">
         <div className="text-xl font-bold">Create an account</div>
         <div className="text-sm text-muted mt-1">Personal Budget Dashboard</div>
 

@@ -14,11 +14,11 @@ export default async function BillsPage() {
   return (
     <>
       <div className="flex justify-between items-end flex-wrap gap-4">
-        <div className="text-[28px] font-bold tracking-tight">Bills</div>
+        <div className="text-2xl md:text-[28px] font-bold tracking-tight">Bills</div>
         <AddBill />
       </div>
 
-      <div className="bg-surface border border-border rounded-xl p-6 mt-6 max-w-2xl">
+      <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mt-6 max-w-2xl">
         <div className="flex flex-col">
           {bills.length === 0 && <div className="text-sm text-muted py-2">No bills yet.</div>}
           {bills.map((bill) => (

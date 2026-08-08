@@ -12,10 +12,10 @@ export default async function CategorySettingsPage() {
 
   return (
     <>
-      <div className="text-[28px] font-bold tracking-tight">Settings</div>
+      <div className="text-2xl md:text-[28px] font-bold tracking-tight">Settings</div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div className="bg-surface border border-border rounded-xl p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 mt-6">
+        <div className="bg-surface border border-border rounded-xl p-4 sm:p-6">
           <div className="text-[15px] font-semibold mb-4">Preferences</div>
           <PreferencesForm
             accentColor={user.accentColor}
@@ -24,7 +24,7 @@ export default async function CategorySettingsPage() {
           />
         </div>
 
-        <div className="bg-surface border border-border rounded-xl p-6">
+        <div className="bg-surface border border-border rounded-xl p-4 sm:p-6">
           <div className="text-[15px] font-semibold mb-4">Budget categories</div>
           <CategoryList
             categories={categories.map((c) => ({

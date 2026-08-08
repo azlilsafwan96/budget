@@ -32,7 +32,7 @@ export function AddBill() {
 
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-sm">
+          <div className="bg-surface border border-border rounded-xl p-5 sm:p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
             <div className="text-[15px] font-semibold mb-4">Add bill</div>
             <form action={action} className="flex flex-col gap-3">
               <div>

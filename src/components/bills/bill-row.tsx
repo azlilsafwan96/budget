@@ -42,14 +42,14 @@ export function BillRow({
 
   return (
     <div
-      className="flex justify-between items-center border-t border-border"
+      className="flex justify-between items-center flex-wrap gap-3 border-t border-border"
       style={{ padding: "var(--row-pad) 0", opacity: isPending ? 0.6 : 1 }}
     >
       <div>
         <div className="text-sm font-semibold">{name}</div>
         <div className="text-xs mt-0.5 text-muted">Due {due}</div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
         <div className="text-right">
           <div className="text-sm font-semibold tabular-nums">{amountLabel}</div>
           <div

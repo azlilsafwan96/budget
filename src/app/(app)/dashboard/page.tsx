@@ -17,10 +17,12 @@ export default async function DashboardPage() {
     <>
       <div className="flex justify-between items-end flex-wrap gap-4">
         <div>
-          <div className="text-[28px] font-bold tracking-tight">Good afternoon, {user.name}</div>
+          <div className="text-2xl md:text-[28px] font-bold tracking-tight">
+            Good afternoon, {user.name}
+          </div>
           <div className="text-sm mt-1 text-muted">{monthLabel} · Personal Budget</div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {user.showGamification && (
             <div className="flex items-center gap-2 bg-surface border border-border rounded-full pl-3 pr-4 py-2">
               <div className="w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
@@ -31,7 +33,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-7">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 mt-6 md:mt-7">
         <Card>
           <CardLabel>Spent this month</CardLabel>
           <div className="text-[32px] font-bold mt-2.5 tabular-nums">{data.totalSpent}</div>
@@ -70,7 +72,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 sm:gap-6 items-start mt-6">
         <div className="flex flex-col gap-6">
           <Card>
             <div className="text-[15px] font-semibold mb-4.5">Budget categories</div>
@@ -102,16 +104,16 @@ export default async function DashboardPage() {
               {data.transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="flex justify-between items-center border-t border-border"
+                  className="flex justify-between items-center flex-wrap gap-x-3 gap-y-1 border-t border-border"
                   style={{ padding: "var(--row-pad) 0" }}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 flex-wrap">
                     <div className="text-sm font-semibold">{tx.merchant}</div>
                     <div className="text-[11.5px] font-semibold text-muted-strong bg-pill-bg px-2.5 py-[3px] rounded-full">
                       {tx.category}
                     </div>
                   </div>
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-3 sm:gap-5">
                     <div className="text-[13px] text-muted">{tx.date}</div>
                     <div className="text-sm font-semibold tabular-nums min-w-[90px] text-right">
                       -{tx.amountLabel}
@@ -159,7 +161,7 @@ export default async function DashboardPage() {
               {data.bills.map((bill) => (
                 <div
                   key={bill.id}
-                  className="flex justify-between items-center border-t border-border"
+                  className="flex justify-between items-center flex-wrap gap-x-3 gap-y-1 border-t border-border"
                   style={{ padding: "var(--row-pad) 0" }}
                 >
                   <div>
@@ -184,7 +186,9 @@ export default async function DashboardPage() {
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-surface border border-border rounded-xl p-6 ${className}`}>{children}</div>
+    <div className={`bg-surface border border-border rounded-xl p-4 sm:p-6 ${className}`}>
+      {children}
+    </div>
   );
 }
 

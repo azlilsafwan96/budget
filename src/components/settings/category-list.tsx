@@ -49,7 +49,7 @@ export function CategoryList({
         {categories.map((c) => (
           <div
             key={c.id}
-            className="flex justify-between items-center border-t border-border py-3"
+            className="flex justify-between items-center flex-wrap gap-3 border-t border-border py-3"
           >
             <div className="text-sm font-semibold">{c.name}</div>
             <div className="flex items-center gap-4">
@@ -75,7 +75,10 @@ export function CategoryList({
         </p>
       )}
 
-      <form action={action} className="flex gap-2 items-end border-t border-border pt-4">
+      <form
+        action={action}
+        className="flex flex-col sm:flex-row gap-2 sm:items-end border-t border-border pt-4"
+      >
         <div className="flex-1">
           <label className="text-xs font-semibold text-muted-strong">Category name</label>
           <input
@@ -84,7 +87,7 @@ export function CategoryList({
             className="w-full mt-1 border border-border rounded-md px-3 py-2 text-sm bg-transparent"
           />
         </div>
-        <div className="w-32">
+        <div className="sm:w-32">
           <label className="text-xs font-semibold text-muted-strong">Limit (RM/mo)</label>
           <input
             name="monthlyLimit"
@@ -98,7 +101,7 @@ export function CategoryList({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 text-white text-sm font-semibold rounded-md px-4 py-2 transition disabled:cursor-not-allowed hover:not-disabled:brightness-90"
+          className="inline-flex items-center justify-center gap-2 text-white text-sm font-semibold rounded-md px-4 py-2 transition disabled:cursor-not-allowed hover:not-disabled:brightness-90"
           style={{ background: "var(--accent)" }}
         >
           {pending && <Spinner className="w-4 h-4" />}

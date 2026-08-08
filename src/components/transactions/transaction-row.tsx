@@ -30,16 +30,16 @@ export function TransactionRow({
 
   return (
     <div
-      className="flex justify-between items-center border-t border-border"
+      className="flex justify-between items-center flex-wrap gap-x-3 gap-y-2 border-t border-border"
       style={{ padding: "var(--row-pad) 0", opacity: isPending ? 0.6 : 1 }}
     >
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2.5 flex-wrap">
         <div className="text-sm font-semibold">{merchant}</div>
         <div className="text-[11.5px] font-semibold text-muted-strong bg-pill-bg px-2.5 py-[3px] rounded-full">
           {category}
         </div>
       </div>
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3 sm:gap-5">
         <div className="text-[13px] text-muted">{date}</div>
         <div className="text-sm font-semibold tabular-nums min-w-[90px] text-right">
           -{amountLabel}
