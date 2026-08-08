@@ -57,6 +57,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* iOS Safari auto-zooms on focus into any input/select/textarea with a
+   computed font-size under 16px. Force 16px on mobile so typing doesn't
+   trigger a zoom the user then has to manually zoom back out from. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 @keyframes toast-in {
   from {
     opacity: 0;
