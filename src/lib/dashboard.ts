@@ -81,14 +81,17 @@ export async function getDashboardData(userId: string, cycleStartDay: number) {
       date: t.date.toLocaleDateString("en-MY", { month: "short", day: "numeric" }),
       amountLabel: fmt(t.amount),
     })),
-    bills: bills.map((b) => ({
-      id: b.id,
-      name: b.name,
-      due: `Day ${b.dueDay}`,
-      amountLabel: fmt(b.amount),
-      statusLabel: b.paid ? "Paid" : b.autopay ? "Autopay" : "Manual",
-      statusColor: b.paid ? "var(--accent)" : "var(--muted)",
-    })),
+    bills: bills.map((b) => {
+      const isPaid = b.paidAt !== null && b.paidAt >= monthStart;
+      return {
+        id: b.id,
+        name: b.name,
+        due: `Day ${b.dueDay}`,
+        amountLabel: fmt(b.amount),
+        statusLabel: isPaid ? "Paid" : b.autopay ? "Autopay" : "Manual",
+        statusColor: isPaid ? "var(--accent)" : "var(--muted)",
+      };
+    }),
     totalSpent: fmt(totalSpent),
     totalBudget: fmt(totalBudget),
     remaining: fmt(totalBudget - totalSpent),

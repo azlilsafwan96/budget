@@ -64,10 +64,10 @@ async function main() {
   }
 
   const billDefs = [
-    { name: "Rent", amount: 180000, dueDay: 1, autopay: false, paid: true },
-    { name: "Internet (Unifi)", amount: 12900, dueDay: 10, autopay: true, paid: false },
-    { name: "Car Insurance", amount: 9500, dueDay: 15, autopay: true, paid: false },
-    { name: "Netflix", amount: 4500, dueDay: 20, autopay: true, paid: false },
+    { name: "Rent", amount: 180000, dueDay: 1, autopay: false, paidAt: new Date() },
+    { name: "Internet (Unifi)", amount: 12900, dueDay: 10, autopay: true },
+    { name: "Car Insurance", amount: 9500, dueDay: 15, autopay: true },
+    { name: "Netflix", amount: 4500, dueDay: 20, autopay: true },
   ];
 
   for (const b of billDefs) {

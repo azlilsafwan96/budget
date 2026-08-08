@@ -63,6 +63,48 @@ export async function addTransaction(
   revalidatePath("/dashboard");
 }
 
+const UpdateTransactionSchema = z.object({
+  id: z.string().min(1),
+  merchant: z.string().min(1, { error: "Merchant is required." }).trim(),
+  categoryId: z.string().min(1, { error: "Choose a category." }),
+  amount: z.coerce.number().positive({ error: "Amount must be greater than 0." }),
+  date: z.string().min(1, { error: "Date is required." }),
+});
+
+export async function updateTransaction(
+  _state: TransactionFormState,
+  formData: FormData,
+): Promise<TransactionFormState> {
+  const { userId } = await verifySession();
+  const validated = UpdateTransactionSchema.safeParse({
+    id: formData.get("id"),
+    merchant: formData.get("merchant"),
+    categoryId: formData.get("categoryId"),
+    amount: formData.get("amount"),
+    date: formData.get("date"),
+  });
+  if (!validated.success) return { errors: validated.error.flatten().fieldErrors };
+
+  const category = await prisma.category.findFirst({
+    where: { id: validated.data.categoryId, userId },
+  });
+  if (!category) return { message: "That category no longer exists." };
+
+  const result = await prisma.transaction.updateMany({
+    where: { id: validated.data.id, userId },
+    data: {
+      merchant: validated.data.merchant,
+      categoryId: category.id,
+      amount: Math.round(validated.data.amount * 100),
+      date: new Date(validated.data.date),
+    },
+  });
+  if (result.count === 0) return { message: "That transaction no longer exists." };
+
+  revalidatePath("/transactions");
+  revalidatePath("/dashboard");
+}
+
 export async function deleteTransaction(transactionId: string) {
   const { userId } = await verifySession();
   await prisma.transaction.deleteMany({ where: { id: transactionId, userId } });

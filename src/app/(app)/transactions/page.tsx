@@ -1,15 +1,16 @@
 import { getCurrentUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
-import { fmt } from "@/lib/currency";
 import { TransactionRow } from "@/components/transactions/transaction-row";
 
 export default async function TransactionsPage() {
   const user = await getCurrentUser();
-  const transactions = await prisma.transaction.findMany({
-    where: { userId: user.id },
-    include: { category: true },
-    orderBy: { date: "desc" },
-  });
+  const [transactions, categories] = await Promise.all([
+    prisma.transaction.findMany({
+      where: { userId: user.id },
+      orderBy: { date: "desc" },
+    }),
+    prisma.category.findMany({ where: { userId: user.id }, select: { id: true, name: true } }),
+  ]);
 
   return (
     <>
@@ -27,9 +28,10 @@ export default async function TransactionsPage() {
               key={tx.id}
               id={tx.id}
               merchant={tx.merchant}
-              category={tx.category?.name ?? "Uncategorized"}
-              date={tx.date.toLocaleDateString("en-MY", { month: "short", day: "numeric" })}
-              amountLabel={fmt(tx.amount)}
+              categoryId={tx.categoryId}
+              categories={categories}
+              dateISO={tx.date.toISOString().slice(0, 10)}
+              amount={tx.amount}
             />
           ))}
         </div>

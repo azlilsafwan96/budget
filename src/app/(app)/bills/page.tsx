@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
-import { fmt } from "@/lib/currency";
+import { getCurrentCycleWindow } from "@/lib/cycle";
 import { AddBill } from "@/components/bills/add-bill";
 import { BillRow } from "@/components/bills/bill-row";
 
@@ -10,6 +10,7 @@ export default async function BillsPage() {
     where: { userId: user.id },
     orderBy: { dueDay: "asc" },
   });
+  const { start: cycleStart } = getCurrentCycleWindow(user.cycleStartDay);
 
   return (
     <>
@@ -26,10 +27,10 @@ export default async function BillsPage() {
               key={bill.id}
               id={bill.id}
               name={bill.name}
-              due={`Day ${bill.dueDay}`}
-              amountLabel={fmt(bill.amount)}
-              paid={bill.paid}
-              statusLabel={bill.paid ? "Paid" : bill.autopay ? "Autopay" : "Manual"}
+              amount={bill.amount}
+              dueDay={bill.dueDay}
+              autopay={bill.autopay}
+              paid={bill.paidAt !== null && bill.paidAt >= cycleStart}
             />
           ))}
         </div>

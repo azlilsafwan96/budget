@@ -4,6 +4,7 @@ import * as z from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/dal";
+import { getCurrentCycleWindow } from "@/lib/cycle";
 
 const BillSchema = z.object({
   name: z.string().min(1, { error: "Name is required." }).trim(),
@@ -42,13 +43,56 @@ export async function addBill(_state: BillFormState, formData: FormData): Promis
   revalidatePath("/dashboard");
 }
 
+const UpdateBillSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1, { error: "Name is required." }).trim(),
+  amount: z.coerce.number().positive({ error: "Amount must be greater than 0." }),
+  dueDay: z.coerce.number().int().min(1).max(31, { error: "Due day must be 1-31." }),
+  autopay: z.union([z.literal("on"), z.undefined()]).optional(),
+});
+
+export async function updateBill(_state: BillFormState, formData: FormData): Promise<BillFormState> {
+  const { userId } = await verifySession();
+  const validated = UpdateBillSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    amount: formData.get("amount"),
+    dueDay: formData.get("dueDay"),
+    autopay: formData.get("autopay") ?? undefined,
+  });
+  if (!validated.success) return { errors: validated.error.flatten().fieldErrors };
+
+  const result = await prisma.bill.updateMany({
+    where: { id: validated.data.id, userId },
+    data: {
+      name: validated.data.name,
+      amount: Math.round(validated.data.amount * 100),
+      dueDay: validated.data.dueDay,
+      autopay: validated.data.autopay === "on",
+    },
+  });
+  if (result.count === 0) return { message: "That bill no longer exists." };
+
+  revalidatePath("/bills");
+  revalidatePath("/dashboard");
+}
+
 export async function toggleBillPaid(billId: string) {
   const { userId } = await verifySession();
 
-  const bill = await prisma.bill.findFirst({ where: { id: billId, userId } });
+  const [bill, user] = await Promise.all([
+    prisma.bill.findFirst({ where: { id: billId, userId } }),
+    prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { cycleStartDay: true } }),
+  ]);
   if (!bill) return;
 
-  await prisma.bill.update({ where: { id: billId }, data: { paid: !bill.paid } });
+  const { start } = getCurrentCycleWindow(user.cycleStartDay);
+  const isPaidThisCycle = bill.paidAt !== null && bill.paidAt >= start;
+
+  await prisma.bill.update({
+    where: { id: billId },
+    data: { paidAt: isPaidThisCycle ? null : new Date() },
+  });
   revalidatePath("/bills");
   revalidatePath("/dashboard");
 }

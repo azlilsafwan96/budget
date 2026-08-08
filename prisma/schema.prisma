@@ -54,15 +54,15 @@ model Transaction {
 }
 
 model Bill {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String
   amount    Int
   dueDay    Int
-  autopay   Boolean  @default(false)
-  paid      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  autopay   Boolean   @default(false)
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
