@@ -1,7 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toggleBillPaid, deleteBill } from "@/lib/actions/bills";
+import { Spinner } from "@/components/ui/spinner";
+import { useToast } from "@/components/ui/toast";
 
 export function BillRow({
   id,
@@ -19,6 +21,24 @@ export function BillRow({
   statusLabel: string;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [pendingAction, setPendingAction] = useState<"toggle" | "delete" | null>(null);
+  const { showToast } = useToast();
+
+  function handleToggle() {
+    setPendingAction("toggle");
+    startTransition(async () => {
+      await toggleBillPaid(id);
+      showToast(paid ? "Bill marked unpaid" : "Bill marked paid");
+    });
+  }
+
+  function handleDelete() {
+    setPendingAction("delete");
+    startTransition(async () => {
+      await deleteBill(id);
+      showToast("Bill deleted");
+    });
+  }
 
   return (
     <div
@@ -42,18 +62,20 @@ export function BillRow({
         <button
           type="button"
           disabled={isPending}
-          onClick={() => startTransition(() => toggleBillPaid(id))}
-          className="text-xs font-semibold px-3 py-1.5 rounded-md border border-border text-muted-strong"
+          onClick={handleToggle}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md border border-border text-muted-strong transition-colors disabled:cursor-not-allowed hover:not-disabled:bg-black/5"
         >
+          {isPending && pendingAction === "toggle" && <Spinner className="w-3.5 h-3.5" />}
           {paid ? "Mark unpaid" : "Mark paid"}
         </button>
         <button
           type="button"
           disabled={isPending}
-          onClick={() => startTransition(() => deleteBill(id))}
-          className="text-xs font-semibold px-3 py-1.5 rounded-md"
+          onClick={handleDelete}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition-colors disabled:cursor-not-allowed hover:not-disabled:bg-[color-mix(in_oklch,var(--over-budget)_12%,transparent)]"
           style={{ color: "var(--over-budget)" }}
         >
+          {isPending && pendingAction === "delete" && <Spinner className="w-3.5 h-3.5" />}
           Delete
         </button>
       </div>

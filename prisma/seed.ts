@@ -17,7 +17,6 @@ async function main() {
       name: "Aiman",
       accentColor: "#2f9e6e",
       showGamification: true,
-      density: "comfortable",
     },
   });
 

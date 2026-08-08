@@ -59,8 +59,8 @@ export async function deleteCategory(categoryId: string): Promise<{ error?: stri
 
 const PreferencesSchema = z.object({
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Invalid color." }),
-  density: z.enum(["comfortable", "compact"]),
   showGamification: z.union([z.literal("on"), z.undefined()]).optional(),
+  cycleStartDay: z.coerce.number().int().min(1).max(31, { error: "Cycle start day must be 1-31." }),
 });
 
 export async function updatePreferences(formData: FormData) {
@@ -68,8 +68,8 @@ export async function updatePreferences(formData: FormData) {
 
   const validated = PreferencesSchema.safeParse({
     accentColor: formData.get("accentColor"),
-    density: formData.get("density"),
     showGamification: formData.get("showGamification") ?? undefined,
+    cycleStartDay: formData.get("cycleStartDay"),
   });
 
   if (!validated.success) return;
@@ -78,8 +78,8 @@ export async function updatePreferences(formData: FormData) {
     where: { id: userId },
     data: {
       accentColor: validated.data.accentColor,
-      density: validated.data.density,
       showGamification: validated.data.showGamification === "on",
+      cycleStartDay: validated.data.cycleStartDay,
     },
   });
 

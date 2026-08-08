@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { login, type AuthFormState } from "@/lib/actions/auth";
 import { GoogleButton } from "@/components/auth/google-button";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(login, undefined);
@@ -43,9 +44,10 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={pending}
-            className="text-white text-sm font-semibold rounded-md py-2.5 mt-2"
+            className="inline-flex items-center justify-center gap-2 text-white text-sm font-semibold rounded-md py-2.5 mt-2 transition disabled:cursor-not-allowed hover:not-disabled:brightness-90"
             style={{ background: "var(--accent, #2f9e6e)" }}
           >
+            {pending && <Spinner className="w-4 h-4" />}
             {pending ? "Logging in…" : "Log in"}
           </button>
         </form>
@@ -60,7 +62,11 @@ export default function LoginPage() {
 
         <div className="text-sm text-muted mt-5">
           No account?{" "}
-          <Link href="/register" className="font-semibold" style={{ color: "var(--accent, #2f9e6e)" }}>
+          <Link
+            href="/register"
+            className="font-semibold hover:underline transition-colors"
+            style={{ color: "var(--accent, #2f9e6e)" }}
+          >
             Sign up
           </Link>
         </div>

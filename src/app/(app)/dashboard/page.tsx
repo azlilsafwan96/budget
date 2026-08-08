@@ -2,15 +2,16 @@ import { getCurrentUser } from "@/lib/dal";
 import { getDashboardData } from "@/lib/dashboard";
 import { prisma } from "@/lib/prisma";
 import { AddTransaction } from "@/components/dashboard/add-transaction";
+import { formatCycleLabel } from "@/lib/cycle";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   const [data, categories] = await Promise.all([
-    getDashboardData(user.id),
+    getDashboardData(user.id, user.cycleStartDay),
     prisma.category.findMany({ where: { userId: user.id }, select: { id: true, name: true } }),
   ]);
 
-  const monthLabel = new Date().toLocaleDateString("en-MY", { month: "long", year: "numeric" });
+  const monthLabel = formatCycleLabel(user.cycleStartDay);
 
   return (
     <>

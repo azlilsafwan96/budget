@@ -1,18 +1,30 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { addBill, type BillFormState } from "@/lib/actions/bills";
+import { Spinner } from "@/components/ui/spinner";
+import { useToast } from "@/components/ui/toast";
 
 export function AddBill() {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState<BillFormState, FormData>(addBill, undefined);
+  const { showToast } = useToast();
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !pending && !state?.errors && !state?.message) {
+      setOpen(false);
+      showToast("Bill created");
+    }
+    wasPending.current = pending;
+  }, [pending, state, showToast]);
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-white px-5 py-[11px] rounded-lg text-sm font-semibold cursor-pointer"
+        className="text-white px-5 py-[11px] rounded-lg text-sm font-semibold cursor-pointer transition hover:brightness-90"
         style={{ background: "var(--accent)" }}
       >
         + Add bill
@@ -22,13 +34,7 @@ export function AddBill() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-sm">
             <div className="text-[15px] font-semibold mb-4">Add bill</div>
-            <form
-              action={async (formData) => {
-                await action(formData);
-                setOpen(false);
-              }}
-              className="flex flex-col gap-3"
-            >
+            <form action={action} className="flex flex-col gap-3">
               <div>
                 <label className="text-xs font-semibold text-muted-strong">Name</label>
                 <input
@@ -83,16 +89,17 @@ export function AddBill() {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="text-sm font-semibold px-4 py-2 rounded-md text-muted"
+                  className="text-sm font-semibold px-4 py-2 rounded-md text-muted transition-colors hover:bg-black/5"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={pending}
-                  className="text-sm font-semibold px-4 py-2 rounded-md text-white"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-md text-white transition disabled:cursor-not-allowed hover:not-disabled:brightness-90"
                   style={{ background: "var(--accent)" }}
                 >
+                  {pending && <Spinner className="w-4 h-4" />}
                   {pending ? "Saving…" : "Save"}
                 </button>
               </div>

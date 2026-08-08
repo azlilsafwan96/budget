@@ -15,7 +15,7 @@ model User {
   image            String?
   accentColor      String   @default("#2f9e6e")
   showGamification Boolean  @default(true)
-  density          Density  @default(comfortable)
+  cycleStartDay    Int      @default(1)
   createdAt        DateTime @default(now())
 
   categories   Category[]
@@ -23,11 +23,6 @@ model User {
   bills        Bill[]
   streakLogs   StreakLog[]
   savingsGoals SavingsGoal[]
-}
-
-enum Density {
-  comfortable
-  compact
 }
 
 model Category {

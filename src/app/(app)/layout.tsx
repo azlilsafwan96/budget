@@ -2,12 +2,13 @@ import { getCurrentUser } from "@/lib/dal";
 import { ThemeVars } from "@/components/theme-vars";
 import { TopNav } from "@/components/top-nav";
 import { logout } from "@/lib/actions/auth";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
   return (
-    <ThemeVars accentColor={user.accentColor} density={user.density}>
+    <ThemeVars accentColor={user.accentColor}>
       <div
         className="min-h-screen"
         style={{ background: "var(--background)", color: "var(--foreground)" }}
@@ -16,13 +17,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="flex items-center justify-between flex-wrap gap-4">
             <TopNav />
             <form action={logout}>
-              <button
-                type="submit"
-                className="text-[13px] font-semibold px-3 py-2 rounded-lg"
+              <SubmitButton
+                pendingText="Logging out…"
+                className="inline-flex items-center gap-2 text-[13px] font-semibold px-3 py-2 rounded-lg transition-colors hover:not-disabled:bg-black/5 disabled:cursor-not-allowed disabled:opacity-70"
                 style={{ color: "var(--muted)" }}
               >
                 Log out
-              </button>
+              </SubmitButton>
             </form>
           </div>
           {children}

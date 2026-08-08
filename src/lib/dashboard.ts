@@ -1,13 +1,13 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { fmt } from "@/lib/currency";
+import { getCurrentCycleWindow } from "@/lib/cycle";
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
-export async function getDashboardData(userId: string) {
+export async function getDashboardData(userId: string, cycleStartDay: number) {
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const { start: monthStart, end: monthEnd } = getCurrentCycleWindow(cycleStartDay, now);
 
   const [categories, monthTransactions, recentTransactions, bills, savingsGoal, streakLogs] =
     await Promise.all([

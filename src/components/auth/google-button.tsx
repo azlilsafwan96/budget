@@ -1,12 +1,20 @@
-import { loginWithGoogle } from "@/lib/actions/auth";
+"use client";
 
-export function GoogleButton() {
+import { useFormStatus } from "react-dom";
+import { loginWithGoogle } from "@/lib/actions/auth";
+import { Spinner } from "@/components/ui/spinner";
+
+function GoogleSubmitButton() {
+  const { pending } = useFormStatus();
   return (
-    <form action={loginWithGoogle}>
-      <button
-        type="submit"
-        className="w-full flex items-center justify-center gap-2 text-sm font-semibold rounded-md py-2.5 border border-border"
-      >
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full flex items-center justify-center gap-2 text-sm font-semibold rounded-md py-2.5 border border-border transition-colors disabled:cursor-not-allowed disabled:opacity-70 hover:not-disabled:bg-black/5 hover:not-disabled:border-foreground/20"
+    >
+      {pending ? (
+        <Spinner className="w-4 h-4" />
+      ) : (
         <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
           <path
             fill="#FFC107"
@@ -25,8 +33,16 @@ export function GoogleButton() {
             d="M43.6 20.5H42V20H24v8h11.3c-1 2.8-2.9 5.1-5.4 6.7l6.7 5.7C39.9 37.4 44 31.3 44 23c0-1.5-.2-2.6-.4-2.5z"
           />
         </svg>
-        Continue with Google
-      </button>
+      )}
+      {pending ? "Redirecting…" : "Continue with Google"}
+    </button>
+  );
+}
+
+export function GoogleButton() {
+  return (
+    <form action={loginWithGoogle}>
+      <GoogleSubmitButton />
     </form>
   );
 }

@@ -19,8 +19,8 @@ export default async function CategorySettingsPage() {
           <div className="text-[15px] font-semibold mb-4">Preferences</div>
           <PreferencesForm
             accentColor={user.accentColor}
-            density={user.density}
             showGamification={user.showGamification}
+            cycleStartDay={user.cycleStartDay}
           />
         </div>
 

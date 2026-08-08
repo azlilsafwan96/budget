@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { addCategory, deleteCategory, type CategoryFormState } from "@/lib/actions/settings";
 import { fmt } from "@/lib/currency";
+import { Spinner } from "@/components/ui/spinner";
+import { useToast } from "@/components/ui/toast";
 
 export function CategoryList({
   categories,
@@ -14,13 +16,29 @@ export function CategoryList({
     undefined,
   );
   const [isDeleting, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { showToast } = useToast();
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !pending && !state?.errors && !state?.message) {
+      showToast("Category created");
+    }
+    wasPending.current = pending;
+  }, [pending, state, showToast]);
 
   function handleDelete(id: string) {
     setDeleteError(null);
+    setDeletingId(id);
     startTransition(async () => {
       const result = await deleteCategory(id);
-      if (result.error) setDeleteError(result.error);
+      if (result.error) {
+        setDeleteError(result.error);
+      } else {
+        showToast("Category deleted");
+      }
+      setDeletingId(null);
     });
   }
 
@@ -40,9 +58,10 @@ export function CategoryList({
                 type="button"
                 disabled={isDeleting}
                 onClick={() => handleDelete(c.id)}
-                className="text-xs font-semibold px-3 py-1.5 rounded-md"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition-colors disabled:cursor-not-allowed hover:not-disabled:bg-[color-mix(in_oklch,var(--over-budget)_12%,transparent)]"
                 style={{ color: "var(--over-budget)" }}
               >
+                {deletingId === c.id && <Spinner className="w-3.5 h-3.5" />}
                 Delete
               </button>
             </div>
@@ -79,10 +98,11 @@ export function CategoryList({
         <button
           type="submit"
           disabled={pending}
-          className="text-white text-sm font-semibold rounded-md px-4 py-2"
+          className="inline-flex items-center gap-2 text-white text-sm font-semibold rounded-md px-4 py-2 transition disabled:cursor-not-allowed hover:not-disabled:brightness-90"
           style={{ background: "var(--accent)" }}
         >
-          Add
+          {pending && <Spinner className="w-4 h-4" />}
+          {pending ? "Adding…" : "Add"}
         </button>
       </form>
       {(state?.errors || state?.message) && (

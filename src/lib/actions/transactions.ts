@@ -62,3 +62,10 @@ export async function addTransaction(
 
   revalidatePath("/dashboard");
 }
+
+export async function deleteTransaction(transactionId: string) {
+  const { userId } = await verifySession();
+  await prisma.transaction.deleteMany({ where: { id: transactionId, userId } });
+  revalidatePath("/transactions");
+  revalidatePath("/dashboard");
+}
