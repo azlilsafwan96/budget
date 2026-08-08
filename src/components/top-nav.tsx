@@ -16,7 +16,7 @@ export function TopNav() {
   const pathname = usePathname();
 
   return (
-    <div className="flex gap-1.5 bg-surface border border-border rounded-[10px] p-[5px] w-fit max-w-full overflow-x-auto">
+    <div className="hidden md:flex gap-1.5 bg-surface border border-border rounded-[10px] p-[5px] w-fit max-w-full overflow-x-auto">
       {tabs.map((tab) => {
         const isActive = pathname.startsWith(tab.href);
         return (

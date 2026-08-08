@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/dal";
 import { ThemeVars } from "@/components/theme-vars";
 import { TopNav } from "@/components/top-nav";
+import { BottomNav } from "@/components/bottom-nav";
 import { logout } from "@/lib/actions/auth";
 import { SubmitButton } from "@/components/ui/submit-button";
 
@@ -13,7 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         className="min-h-screen"
         style={{ background: "var(--background)", color: "var(--foreground)" }}
       >
-        <div className="max-w-[1360px] mx-auto flex flex-col gap-5 md:gap-7 px-4 sm:px-6 md:px-12 pt-6 md:pt-11 pb-10 md:pb-20">
+        <div className="max-w-[1360px] mx-auto flex flex-col gap-5 md:gap-7 px-4 sm:px-6 md:px-12 pt-6 md:pt-11 pb-24 md:pb-20">
           <div className="flex items-center justify-between flex-wrap gap-3 md:gap-4">
             <TopNav />
             <form action={logout}>
@@ -29,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {children}
         </div>
       </div>
+      <BottomNav />
     </ThemeVars>
   );
 }
