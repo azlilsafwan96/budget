@@ -8,6 +8,7 @@ const tabs = [
   { href: "/transactions", label: "Transactions" },
   { href: "/bills", label: "Bills" },
   { href: "/plans", label: "Plans" },
+  { href: "/history", label: "History" },
   { href: "/settings/categories", label: "Settings" },
 ];
 
