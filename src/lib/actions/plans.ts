@@ -106,6 +106,65 @@ export async function addPlanItem(
   revalidatePath("/plans");
 }
 
+const UpdatePlanItemSchema = z.object({
+  id: z.string().min(1),
+  planId: z.string().min(1),
+  name: z.string().min(1, { error: "Name is required." }).trim(),
+  amount: z.coerce.number().positive({ error: "Amount must be greater than 0." }),
+  bought: z.union([z.literal("on"), z.undefined()]).optional(),
+  tags: z.array(z.string().trim().min(1)).optional().default([]),
+});
+
+export async function updatePlanItem(
+  _state: PlanItemFormState,
+  formData: FormData,
+): Promise<PlanItemFormState> {
+  const { userId } = await verifySession();
+
+  const validated = UpdatePlanItemSchema.safeParse({
+    id: formData.get("id"),
+    planId: formData.get("planId"),
+    name: formData.get("name"),
+    amount: formData.get("amount"),
+    bought: formData.get("bought") ?? undefined,
+    tags: formData.getAll("tags"),
+  });
+
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors };
+  }
+
+  const item = await findOwnedPlanItem(validated.data.id, userId);
+  if (!item) {
+    return { message: "That item no longer exists." };
+  }
+
+  const tagNames = [...new Set(validated.data.tags.map((t) => t.toLowerCase()))];
+  const tagIds = await Promise.all(
+    tagNames.map(async (name) => {
+      const tag = await prisma.tag.upsert({
+        where: { userId_name: { userId, name } },
+        update: {},
+        create: { userId, name },
+      });
+      return tag.id;
+    }),
+  );
+
+  await prisma.planItem.update({
+    where: { id: validated.data.id },
+    data: {
+      name: validated.data.name,
+      amount: Math.round(validated.data.amount * 100),
+      bought: validated.data.bought === "on",
+      tags: { set: tagIds.map((id) => ({ id })) },
+    },
+  });
+
+  revalidatePath(`/plans/${validated.data.planId}`);
+  revalidatePath("/plans");
+}
+
 async function findOwnedPlanItem(itemId: string, userId: string) {
   return prisma.planItem.findFirst({
     where: { id: itemId, plan: { userId } },

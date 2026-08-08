@@ -104,9 +104,11 @@ export function PlanDetail({
               id={item.id}
               planId={planId}
               name={item.name}
+              amount={item.amount}
               amountLabel={fmt(item.amount)}
               bought={item.bought}
               tags={item.tags}
+              allTags={allTags}
             />
           ))}
         </div>

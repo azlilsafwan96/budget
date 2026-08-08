@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 
-export function TagInput({ allTags }: { allTags: string[] }) {
-  const [tags, setTags] = useState<string[]>([]);
+export function TagInput({
+  allTags,
+  initialTags = [],
+}: {
+  allTags: string[];
+  initialTags?: string[];
+}) {
+  const [tags, setTags] = useState<string[]>(initialTags);
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
