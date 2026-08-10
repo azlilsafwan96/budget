@@ -9,6 +9,7 @@ import {
 import { fmt } from "@/lib/currency";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import { AmountInput } from "@/components/ui/amount-input";
 
 export function CategoryRow({
   id,
@@ -70,13 +71,10 @@ export function CategoryRow({
           </div>
           <div className="sm:w-32">
             <label className="text-xs font-semibold text-muted-strong">Limit (RM/mo)</label>
-            <input
+            <AmountInput
               name="monthlyLimit"
-              type="number"
-              step="0.01"
-              min="0.01"
               required
-              defaultValue={monthlyLimit / 100}
+              defaultCents={monthlyLimit}
               className="w-full mt-1 border border-border rounded-md px-3 py-2 text-sm bg-transparent"
             />
             {state?.errors?.monthlyLimit && (

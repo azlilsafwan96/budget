@@ -9,6 +9,7 @@ import {
 import { fmt } from "@/lib/currency";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import { AmountInput } from "@/components/ui/amount-input";
 
 export function TransactionRow({
   id,
@@ -95,13 +96,10 @@ export function TransactionRow({
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1">
               <label className="text-xs font-semibold text-muted-strong">Amount (RM)</label>
-              <input
+              <AmountInput
                 name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
                 required
-                defaultValue={amount / 100}
+                defaultCents={amount}
                 className="w-full mt-1 border border-border rounded-md px-3 py-2 text-sm bg-transparent"
               />
               {state?.errors?.amount && (

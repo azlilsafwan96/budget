@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { addBill, type BillFormState } from "@/lib/actions/bills";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import { AmountInput } from "@/components/ui/amount-input";
 
 export function AddBill() {
   const [open, setOpen] = useState(false);
@@ -50,11 +51,8 @@ export function AddBill() {
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-strong">Amount (RM)</label>
-                <input
+                <AmountInput
                   name="amount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
                   required
                   className="w-full mt-1 border border-border rounded-md px-3 py-2 text-sm bg-transparent"
                 />

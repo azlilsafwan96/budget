@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { addTransaction, type TransactionFormState } from "@/lib/actions/transactions";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import { AmountInput } from "@/components/ui/amount-input";
 
 export function AddTransaction({ categories }: { categories: { id: string; name: string }[] }) {
   const [open, setOpen] = useState(false);
@@ -67,11 +68,8 @@ export function AddTransaction({ categories }: { categories: { id: string; name:
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-strong">Amount (RM)</label>
-                <input
+                <AmountInput
                   name="amount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
                   required
                   className="w-full mt-1 border border-border rounded-md px-3 py-2 text-sm bg-transparent"
                 />
