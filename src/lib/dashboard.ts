@@ -57,6 +57,7 @@ export async function getDashboardData(userId: string, cycleStartDay: number) {
   });
 
   const totalSpent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+  const totalBills = bills.reduce((sum, b) => sum + b.amount, 0);
   const totalBudget = categories.reduce((sum, c) => sum + c.monthlyLimit, 0);
   const spentPct = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
@@ -94,6 +95,7 @@ export async function getDashboardData(userId: string, cycleStartDay: number) {
     }),
     totalSpent: fmt(totalSpent),
     totalBudget: fmt(totalBudget),
+    totalBills: fmt(totalBills),
     remaining: fmt(totalBudget - totalSpent),
     spentPct,
     savingsGoalName: savingsGoal?.name ?? "No goal set",

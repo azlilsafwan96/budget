@@ -155,7 +155,12 @@ export default async function DashboardPage() {
           )}
 
           <Card>
-            <div className="text-[15px] font-semibold mb-1.5">Upcoming bills</div>
+            <div className="flex justify-between items-baseline gap-3 mb-1.5">
+              <div className="text-[15px] font-semibold">Upcoming bills</div>
+              <div className="text-[13.5px] font-semibold tabular-nums text-muted-strong">
+                {data.totalBills} total
+              </div>
+            </div>
             <div className="flex flex-col">
               {data.bills.length === 0 && <EmptyState text="No bills yet." />}
               {data.bills.map((bill) => (
