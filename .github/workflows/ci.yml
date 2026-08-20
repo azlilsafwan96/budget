@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to a PR cancels the run still in flight for it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Placeholders. No check connects to a database: every page that reads one
+      # is dynamic, so `next build` never queries during prerender. They exist
+      # because Prisma and NextAuth read them at module load.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+      AUTH_SECRET: ci-placeholder-secret-32-bytes-min
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # src/generated/prisma is gitignored, so nothing typechecks until this runs.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      # Generates next-env.d.ts and the route-aware globals (LayoutProps,
+      # PageProps, RouteContext) that tsc needs. `next build` would also produce
+      # them, but typecheck runs first — and a fresh checkout has neither.
+      - name: Generate Next.js route types
+        run: npx next typegen
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Production build
+        run: npm run build
+
+  # Guards against a schema change landing without the migration that applies it.
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: budget
+          POSTGRES_PASSWORD: budget
+          POSTGRES_DB: budget
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://budget:budget@localhost:5432/budget?schema=public
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The seed script imports the generated client, which is gitignored.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply migrations to a clean database
+        run: npx prisma migrate deploy
+
+      # Fails if schema.prisma has drifted from the committed migrations — i.e.
+      # someone edited the schema without running `prisma migrate dev`. Compares
+      # the freshly-migrated database against the schema; --exit-code returns 2
+      # when they differ.
+      - name: Check schema matches migrations
+        run: |
+          npx prisma migrate diff \
+            --from-config-datasource \
+            --to-schema prisma/schema.prisma \
+            --exit-code
+
+      # Proves the seed script still runs against the current schema.
+      - name: Seed
+        run: npx prisma db seed
