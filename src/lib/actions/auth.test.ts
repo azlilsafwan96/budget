@@ -85,14 +85,38 @@ describe("register", () => {
     );
   });
 
-  it("rejects an email with surrounding whitespace", async () => {
-    // Documents current behaviour, not desired behaviour: `z.email().trim()`
-    // validates the format *before* trimming, so a pasted email with a stray
-    // space is refused. Swapping to `z.string().trim().pipe(z.email())` would
-    // accept it — flip this test if that changes.
-    const state = await register(undefined, form({ ...validFields, email: " user@example.com " }));
-    expect(state?.errors?.email).toBeDefined();
+  it("accepts and trims a pasted email with surrounding whitespace", async () => {
+    await register(undefined, form({ ...validFields, email: " user@example.com " }));
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ email: "user@example.com" }) }),
+    );
+  });
+
+  it("rejects a name that is only whitespace", async () => {
+    // Guards the validate-then-trim ordering: "  " is 2 characters, so it used
+    // to satisfy min(2) and then trim down to an empty name.
+    const state = await register(undefined, form({ ...validFields, name: "  " }));
+    expect(state?.errors?.name).toBeDefined();
     expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it("measures password length on the literal input", async () => {
+    // The password is no longer trimmed, so length is whatever the user typed.
+    // "  abc  " is 7 characters and fails; padding it to 8 makes it a valid
+    // 8-character password, which is exactly what gets hashed and compared.
+    const short = await register(undefined, form({ ...validFields, password: "  abc  " }));
+    expect(short?.errors?.password).toBeDefined();
+
+    const ok = await register(undefined, form({ ...validFields, password: "  abc   " }));
+    expect(ok?.errors).toBeUndefined();
+    expect(hash).toHaveBeenLastCalledWith("  abc   ", 10);
+  });
+
+  it("hashes the password exactly as typed", async () => {
+    // src/auth.ts compares the raw submitted password on login, so registration
+    // must not transform it — a trimmed hash would lock the user out.
+    await register(undefined, form({ ...validFields, password: " keeps spaces " }));
+    expect(hash).toHaveBeenCalledWith(" keeps spaces ", 10);
   });
 });
 
