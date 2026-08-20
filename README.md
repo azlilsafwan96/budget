@@ -79,6 +79,20 @@ Two things worth knowing:
 The CI workflow also runs migrations against a real Postgres and fails if
 `schema.prisma` has drifted from the committed migrations.
 
+### Container images
+
+Every commit that reaches `main` is built and published to GitHub Container
+Registry by `.github/workflows/release.yml`:
+
+```
+ghcr.io/azlilsafwan96/budget:<short-sha>   # deploy and roll back to these
+ghcr.io/azlilsafwan96/budget:latest        # convenience only
+```
+
+Deploy the SHA tag, never `latest` — `latest` tells you nothing about what is
+actually running, which is exactly what you need to know during an incident.
+Images are `linux/amd64`.
+
 ### Shipping a change
 
 `main` is protected: direct pushes are rejected and `verify` + `migrations`
