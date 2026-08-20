@@ -5,6 +5,9 @@ name: Release
 on:
   push:
     branches: [main]
+  # Manual escape hatch: publish an image for whatever is on main right now,
+  # without waiting for the next merge.
+  workflow_dispatch:
 
 # Never cancel a publish half-way; a partially pushed tag is worse than a
 # slightly stale queue.
