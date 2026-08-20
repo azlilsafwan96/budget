@@ -23,7 +23,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          if gh pr view "$BRANCH" --json number --jq .number >/dev/null 2>&1; then
+          # `gh pr view` matches closed and merged PRs too, so it cannot answer
+          # "is one open right now?" — reusing a branch name would make it skip
+          # creation and then fail with nothing to merge. Ask for open PRs only.
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]; then
             echo "PR already open for $BRANCH"
           else
             # Title comes from the branch's first commit subject; body links back
@@ -41,4 +44,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ github.ref_name }}
-        run: gh pr merge "$BRANCH" --auto --squash --delete-branch
+        run: |
+          # Re-running this job after the PR has already merged is not a
+          # failure — there is simply nothing left to queue.
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]; then
+            echo "No open PR for $BRANCH; nothing to auto-merge."
+            exit 0
+          fi
+          gh pr merge "$BRANCH" --auto --squash --delete-branch
