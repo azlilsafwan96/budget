@@ -40,6 +40,14 @@ npx prisma generate
 step "Validating Prisma schema"
 npx prisma validate
 
+# `next dev`/`next build` generate next-env.d.ts and the route-aware globals
+# (LayoutProps, PageProps, RouteContext) into .next/types. A fresh checkout has
+# neither, so typechecking before the build fails on a clean machine even though
+# it passes on one that has built before. `typegen` produces them without a
+# full build.
+step "Generating Next.js route types"
+npx next typegen
+
 step "Linting"
 npm run lint
 
