@@ -1,9 +1,11 @@
 name: CI
 
+# Runs on every branch push. Check runs attach to the commit SHA, so a
+# push-triggered run satisfies the required status checks on a PR for that same
+# commit — no `pull_request` trigger needed, and no duplicate run per push.
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: ["**"]
 
 # A new push to a PR cancels the run still in flight for it.
 concurrency:

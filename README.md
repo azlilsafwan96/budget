@@ -79,6 +79,27 @@ Two things worth knowing:
 The CI workflow also runs migrations against a real Postgres and fails if
 `schema.prisma` has drifted from the committed migrations.
 
+### Shipping a change
+
+`main` is protected: direct pushes are rejected and `verify` + `migrations`
+must pass before anything merges. The rest is automated — push a branch and a
+PR is opened for it, with auto-merge enabled:
+
+```bash
+git checkout -b fix-something
+npm run ci:fast          # optional, but cheaper than a failed CI run
+git push -u origin fix-something
+```
+
+CI runs, and if it goes green the PR squash-merges itself and the branch is
+deleted. If a check fails the PR stays open — push a fix to the same branch and
+it re-evaluates.
+
+Note that CI is the only gate on `main`, so treat a red check as a stop sign
+rather than something to override. The app container runs `prisma migrate
+deploy` on boot, which means a schema change that merges is a schema change
+that applies on your next deploy.
+
 ## Database
 
 Prisma 7 requires a driver adapter at runtime (no implicit `datasource.url`
