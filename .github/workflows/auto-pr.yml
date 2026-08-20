@@ -3,6 +3,12 @@ name: Auto PR
 # Opens a PR for any branch you push and turns on auto-merge, so a branch that
 # passes CI lands on main without further clicks. Branch protection still does
 # the gating — auto-merge only fires once the required checks are green.
+#
+# Uses AUTOMERGE_TOKEN (a fine-grained PAT) rather than GITHUB_TOKEN, because a
+# push made with GITHUB_TOKEN does not trigger workflows: merging with it left
+# main with no CI run and no published image. Falls back to GITHUB_TOKEN so the
+# workflow still functions if the secret is missing — merges just stop
+# triggering main workflows again.
 on:
   push:
     branches-ignore: [main]
@@ -20,7 +26,7 @@ jobs:
 
       - name: Open a PR if one is not already open
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTOMERGE_TOKEN || secrets.GITHUB_TOKEN }}
           BRANCH: ${{ github.ref_name }}
         run: |
           # `gh pr view` matches closed and merged PRs too, so it cannot answer
@@ -42,7 +48,7 @@ jobs:
       # merges; if a check fails, the PR just stays open.
       - name: Enable auto-merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTOMERGE_TOKEN || secrets.GITHUB_TOKEN }}
           BRANCH: ${{ github.ref_name }}
         run: |
           # Re-running this job after the PR has already merged is not a
