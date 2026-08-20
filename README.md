@@ -47,6 +47,38 @@ Generate a real `AUTH_SECRET` with `openssl rand -base64 32`.
 - `prisma/schema.prisma` — `User`, `Category`, `Transaction`, `Bill`,
   `SavingsGoal`, `StreakLog`.
 
+## Testing & CI
+
+```bash
+npm test               # unit tests (Vitest)
+npm run test:watch     # watch mode
+npm run test:coverage  # + coverage report
+npm run ci             # everything CI runs: generate, lint, typecheck, test, build
+npm run ci:fast        # same, minus the production build
+```
+
+`scripts/ci.sh` is the single source of truth for the verification gate — the
+GitHub Actions workflow in `.github/workflows/ci.yml` runs the same steps, so a
+green local run means a green pipeline.
+
+Tests live next to what they cover (`src/lib/cycle.test.ts`). Two kinds:
+
+- **Pure logic** (`cycle`, `currency`) — called directly.
+- **Server Actions and data loaders** (`src/lib/actions/`, `dashboard`,
+  `history`) — Prisma, `verifySession`, and `next/cache` are mocked, so the
+  suite needs no database. Assertions cover validation, ringgit→cents
+  conversion, and that every query is scoped to the session user.
+
+Two things worth knowing:
+
+- `TZ=Asia/Kuala_Lumpur` is pinned by the test scripts. Billing-cycle maths and
+  `en-MY` date formatting are timezone sensitive, and CI runners are UTC.
+- Coverage on `src/lib/**` is gated at 85%. Components are reported but not
+  gated — most are markup, and `next build` typechecks them.
+
+The CI workflow also runs migrations against a real Postgres and fails if
+`schema.prisma` has drifted from the committed migrations.
+
 ## Database
 
 Prisma 7 requires a driver adapter at runtime (no implicit `datasource.url`
