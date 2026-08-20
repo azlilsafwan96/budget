@@ -1,0 +1,44 @@
+name: Auto PR
+
+# Opens a PR for any branch you push and turns on auto-merge, so a branch that
+# passes CI lands on main without further clicks. Branch protection still does
+# the gating — auto-merge only fires once the required checks are green.
+on:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  open-and-automerge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open a PR if one is not already open
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if gh pr view "$BRANCH" --json number --jq .number >/dev/null 2>&1; then
+            echo "PR already open for $BRANCH"
+          else
+            # Title comes from the branch's first commit subject; body links back
+            # to the full log rather than duplicating it.
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "$(git log -1 --pretty=%s)" \
+              --body "Opened automatically from a push to \`$BRANCH\`."
+          fi
+
+      # Queues the merge. GitHub holds it until the required checks pass, then
+      # merges; if a check fails, the PR just stays open.
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: gh pr merge "$BRANCH" --auto --squash --delete-branch
