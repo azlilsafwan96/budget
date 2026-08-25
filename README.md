@@ -117,7 +117,7 @@ and pull-request write on this repo. This is not optional plumbing: a push made
 with the default `GITHUB_TOKEN` does not trigger workflows, so merging with it
 leaves `main` with no CI run and no published image. When the token expires,
 that is the symptom — merges keep working, but nothing runs on `main`
-afterwards.
+afterwards. Rotated 2026-08-26.
 
 Note that CI is the only gate on `main`, so treat a red check as a stop sign
 rather than something to override. The app container runs `prisma migrate
