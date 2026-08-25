@@ -138,12 +138,24 @@ npx prisma studio                        # browse data
 
 ## Deploying to your own server
 
+The app service runs the image CI published, rather than building from source
+on the host. Pick the tag you want with `APP_TAG` — always a commit SHA, so
+what is running is knowable:
+
 ```bash
 cp .env.example .env   # set a real AUTH_SECRET
 export AUTH_SECRET=$(openssl rand -base64 32)
 export AUTH_URL=https://YOUR_DOMAIN
-docker compose --profile prod up -d --build
+
+export APP_TAG=<short-sha>            # from the Release workflow
+docker compose --profile prod pull
+docker compose --profile prod up -d
 ```
+
+Rolling back is the same commands with an older `APP_TAG` — but note that it
+rolls back the *code*, not the database. A deploy that applied a migration has
+already changed the schema, and an older image may not run against it. Back up
+before deploying anything with a destructive migration.
 
 This starts Postgres and the app in one Compose project. The app container
 runs `prisma migrate deploy` on boot, then starts the server. Put a reverse
