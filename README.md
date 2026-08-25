@@ -71,8 +71,11 @@ Tests live next to what they cover (`src/lib/cycle.test.ts`). Two kinds:
 
 Two things worth knowing:
 
-- `TZ=Asia/Kuala_Lumpur` is pinned by the test scripts. Billing-cycle maths and
-  `en-MY` date formatting are timezone sensitive, and CI runners are UTC.
+- `TZ=Asia/Kuala_Lumpur` is pinned by the test scripts *and* by the runtime
+  image (`Dockerfile`, overridable via `TZ` in `docker-compose.yml`).
+  Billing-cycle maths and `en-MY` date formatting are timezone sensitive, and
+  both CI runners and containers default to UTC — on UTC a cycle starting on
+  the 26th only rolls over at 08:00 local.
 - Coverage on `src/lib/**` is gated at 85%. Components are reported but not
   gated — most are markup, and `next build` typechecks them.
 
