@@ -14,6 +14,11 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Cycle maths and en-MY date formatting run in server-local time, so the
+# container must not default to UTC — a 26th-of-the-month cycle would otherwise
+# not roll over until 08:00 local. Matches the TZ the test scripts pin.
+ENV TZ=Asia/Kuala_Lumpur
+
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
