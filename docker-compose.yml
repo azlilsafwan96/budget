@@ -17,7 +17,10 @@ services:
       retries: 10
 
   app:
-    build: .
+    # Runs the image CI built and verified, rather than rebuilding from source
+    # on the host. Pin APP_TAG to a commit SHA so what is running is knowable;
+    # `latest` is only a fallback for a first run.
+    image: ghcr.io/azlilsafwan96/budget:${APP_TAG:-latest}
     restart: unless-stopped
     depends_on:
       db:
